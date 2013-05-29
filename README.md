@@ -1,0 +1,4 @@
+EDAMI
+=====
+
+Projekt z EDAMI
