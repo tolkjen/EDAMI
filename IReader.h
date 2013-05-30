@@ -15,6 +15,8 @@ public:
 	 * @return A sequence of read data.
 	 */
 	virtual std::vector<SparseData> read(std::string filename) = 0;
+	
+	virtual int attributeCount() const;
 };
 
 #endif
