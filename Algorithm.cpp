@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <cmath>
 #include <set>
+#include <iostream>
 
 #include "Algorithm.h"
 
@@ -192,6 +193,9 @@ double binarySimilarity(SparseData &a, SparseData &b) {
 			common++;
 			ptrA++;
 			ptrB++;
+		} else {
+			ptrA++;
+			ptrB++;
 		}
 	}
 	
@@ -215,7 +219,7 @@ double vectorDifference(SparseData &a, SparseData &b) {
 			sum += (double) d * d;
 			ptrA++;
 			ptrB++;
-		}
+		} 
 	}
 	
 	while (ptrA < a.data.size()) {
