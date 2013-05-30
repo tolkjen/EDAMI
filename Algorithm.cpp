@@ -64,8 +64,6 @@ vector<Algorithm::IDVector> Algorithm::naiveReal(vector<SparseData> &data, vecto
 	return result;
 }
 
-#include <iostream>
-
 vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim, int attr) {
 	vector<IDVector> result;
 	
@@ -119,7 +117,7 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 	return result;
 }
 
-vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim, int attr) {
+vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim) {
 	vector<IDVector> result;
 	
 	set<pair<int, double>, classcomp> idSet;

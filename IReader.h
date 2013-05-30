@@ -16,6 +16,11 @@ public:
 	 */
 	virtual std::vector<SparseData> read(std::string filename) = 0;
 	
+	/*
+	 * Returns the number of attributes in the data set.
+	 * 
+	 * @return Number of attributes.
+	 */
 	virtual int attributeCount() const;
 };
 
