@@ -20,7 +20,7 @@ public:
 	 * @param inner Contains IDs of vectors for which groups are built.
 	 * @return A vector of IDVectors. Each IDVector corresponds to one group and holds info about similar vector IDs.
 	 */
-	std::vector<IDVector> calculate(std::vector<int> &outer, std::vector<int> &inner) {}
+	virtual std::vector<IDVector> calculate(std::vector<int> &outer, std::vector<int> &inner) {}
 	
 	/*
 	 * Sets a data to work on.
