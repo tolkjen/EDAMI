@@ -1,10 +1,9 @@
 #include <iostream>
-#include "SparseData.h"
+#include "Algorithm.h"
 
 using namespace std;
 
 int main() {
-	SparseData d;
 	/*shared_ptr<IReader> reader( new KryszkiewiczReader );
 	vector<SparseData> data = reader->read("plik.dat", false);
 	
@@ -18,6 +17,8 @@ int main() {
 	for t in algo->timings:
 		print t.description
 		print t.value*/
+	
+	Algorithm algo;
 		
 	return 0;
 }

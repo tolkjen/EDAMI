@@ -18,6 +18,9 @@ public:
 	 * @return A sequence of read data.
 	 */
 	virtual std::vector<SparseData> read(std::string filename, bool binarize) = 0;
+	
+protected:
+	
 };
 
 #endif
