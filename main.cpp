@@ -1,5 +1,11 @@
+#include <iostream>
+#include "SparseData.h"
+
+using namespace std;
+
 int main() {
-	shared_ptr<IReader> reader( new KryszkiewiczReader );
+	SparseData d;
+	/*shared_ptr<IReader> reader( new KryszkiewiczReader );
 	vector<SparseData> data = reader->read("plik.dat", false);
 	
 	shared_ptr<IAlgorithm> algo( new TriangleAlgorithm() );
@@ -11,7 +17,7 @@ int main() {
 	
 	for t in algo->timings:
 		print t.description
-		print t.value
+		print t.value*/
 		
 	return 0;
 }
