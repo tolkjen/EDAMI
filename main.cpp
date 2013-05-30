@@ -1,5 +1,7 @@
 #include <iostream>
+#include <iomanip>
 #include "Algorithm.h"
+#include "Timer.h"
 
 using namespace std;
 
@@ -37,10 +39,13 @@ int main() {
 	
 	// Algorithm
 	double similarity = 0.5;
+	
+	Timer::instance().startMeasure();
 	auto groups = Algorithm::naiveBinary( testDataVector, outer_range, inner_range, similarity );
 	//auto groups = Algorithm::naiveReal( testDataVector, outer_range, inner_range, similarity );
 	//auto groups = Algorithm::triangleBinary( testDataVector, outer_range, inner_range, similarity, length );
 	//auto groups = Algorithm::triangleReal( testDataVector, outer_range, inner_range, similarity, length );
+	Timer::instance().finishMeasure("Calculation time");
 	
 	// Print results
 	for (unsigned int i = 0; i < groups.size(); i++) {
@@ -49,6 +54,11 @@ int main() {
 			cout << id << endl;
 		}
 		cout << endl;
+	}
+	
+	// Print timings
+	for (auto &entry : Timer::instance().measures) {
+		cout << entry.first << ": " << fixed << entry.second << " s" << endl;
 	}
 		
 	return 0;
