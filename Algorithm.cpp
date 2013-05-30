@@ -1,9 +1,3 @@
-/*
- * TODO 
- * log n
- * triangleBinary - dodawanie siebie
- */
-
 #include <algorithm>
 #include <cmath>
 #include <set>
@@ -15,7 +9,7 @@ using namespace std;
 
 struct classcomp {
 	bool operator() (const pair<int, double>& lhs, const pair<int, double>& rhs) const {
-		return lhs.second >= rhs.second;
+		return lhs.second < rhs.second;
 	}
 };
 
@@ -68,7 +62,7 @@ vector<Algorithm::IDVector> Algorithm::naiveReal(vector<SparseData> &data, vecto
 vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim, int attr) {
 	vector<IDVector> result;
 	
-	set<pair<int, double>, classcomp> idSet;
+	multiset<pair<int, double>, classcomp> idSet;
 	for (int outerID : outer) {
 		idSet.insert( make_pair(outerID, (double) data[outerID].data.size() / attr) );
 	}
@@ -81,27 +75,29 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 		IDVector idv;
 		idv.push_back( innerID );
 
-		auto it = idSet.begin();
+		/*auto it = idSet.begin();
 		while (it != idSet.end() && it->first != innerID) {
 			++it;
-		}
+		}*/
+		
+		auto pLookup = make_pair(innerID, (double) data[innerID].data.size() / attr);
+		auto it = idSet.find( pLookup );
 
 		if (it != idSet.end()) {
 			auto itNext = it;
 			++itNext;
-			while (itNext != idSet.end() && (double) it->second - itNext->second <= sim) {
-				if (binarySimilarity(data[it->first], data[itNext->first]) >= sim) {
+			while (itNext != idSet.end() && (double) itNext->second - it->second <= sim) {
+				if (binarySimilarity(data[innerID], data[itNext->first]) >= sim && innerID != itNext->first) {
 					idv.push_back( itNext->first );
 				}
 				++itNext;
 			}
 		}
 		
-		if (it != idSet.begin()) {
 			auto itPrev = it;
-			--itPrev;
-			while ((double) itPrev->second - it->second <= sim) {
-				if (binarySimilarity(data[it->first], data[itPrev->first]) >= sim) {
+			while ((double) it->second - itPrev->second <= sim) {
+
+				if (binarySimilarity(data[innerID], data[itPrev->first]) >= sim && innerID != itPrev->first) {
 					idv.push_back( itPrev->first );
 				}
 				if (itPrev != idSet.begin()) {
@@ -110,7 +106,6 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 					break;
 				}
 			}
-		}
 		
 		result.push_back( idv );
 	}
@@ -121,7 +116,7 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim) {
 	vector<IDVector> result;
 	
-	set<pair<int, double>, classcomp> idSet;
+	multiset<pair<int, double>, classcomp> idSet;
 	for (int outerID : outer) {
 		idSet.insert( make_pair(outerID, vectorLength(data[outerID])) );
 	}
@@ -145,15 +140,18 @@ vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, ve
 		}
 		double modDataLength = vectorLength(modData);
 		
-		auto it = idSet.begin();
+		/*auto it = idSet.begin();
 		while (it != idSet.end() && it->second > modDataLength) {
 			++it;
-		}
+		}*/
+		
+		auto pLookup = make_pair(innerID, vectorLength(data[innerID]));
+		auto it = idSet.find(pLookup);
 		
 		if (it != idSet.end()) {
 			auto itNext = it;
 			++itNext;
-			while (itNext != idSet.end() && (double) modDataLength - itNext->second <= modSimilarity) {
+			while (itNext != idSet.end() && (double) itNext->second - modDataLength <= modSimilarity) {
 				if (vectorDifference(modData, data[itNext->first]) <= modSimilarity && innerID != itNext->first) {
 					idv.push_back( itNext->first );
 				}
@@ -162,7 +160,7 @@ vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, ve
 		}
 		
 		auto itPrev = it;
-		while ((double) itPrev->second - modDataLength <= modSimilarity) {
+		while ((double) modDataLength - itPrev->second <= modSimilarity) {
 			if (vectorDifference(modData, data[itPrev->first]) <= modSimilarity && innerID != itPrev->first) {
 				idv.push_back( itPrev->first );
 			}

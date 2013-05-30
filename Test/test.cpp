@@ -14,13 +14,13 @@ BOOST_AUTO_TEST_CASE( BinaryTest ) {
 	vector<SparseData> testVector;
 	
 	const int length = 20;
-	const int count = 100;
+	const int count = 20;
 	int counter = 0;
 	for (int i = 0; i < count; i++) {
 		SparseData item;
 		item.id = i;
 		for (int j = 0; j < length; j++) {
-			double value = counter*counter % 3;
+			double value = (counter*counter) % 3;
 			counter++;
 			if (value) {
 				item.data.push_back(make_pair(j, value));
