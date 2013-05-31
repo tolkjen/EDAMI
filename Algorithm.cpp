@@ -67,18 +67,9 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 		idSet.insert( make_pair(outerID, (double) data[outerID].data.size() / attr) );
 	}
 	
-	/*for (auto it = idSet.begin(); it != idSet.end(); it++) {
-		cout << "(" << it->first << ", " << it->second << ")" << endl;
-	}*/
-	
 	for (int innerID : inner) {
 		IDVector idv;
 		idv.push_back( innerID );
-
-		/*auto it = idSet.begin();
-		while (it != idSet.end() && it->first != innerID) {
-			++it;
-		}*/
 		
 		auto pLookup = make_pair(innerID, (double) data[innerID].data.size() / attr);
 		auto it = idSet.find( pLookup );
@@ -140,13 +131,13 @@ vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, ve
 		}
 		double modDataLength = vectorLength(modData);
 		
-		/*auto it = idSet.begin();
+		auto it = idSet.begin();
 		while (it != idSet.end() && it->second > modDataLength) {
 			++it;
-		}*/
+		}
 		
-		auto pLookup = make_pair(innerID, vectorLength(data[innerID]));
-		auto it = idSet.find(pLookup);
+		//auto pLookup = make_pair(innerID, vectorLength(data[innerID]));
+		//auto it = idSet.find(pLookup);
 		
 		if (it != idSet.end()) {
 			auto itNext = it;

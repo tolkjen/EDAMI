@@ -14,7 +14,7 @@ BOOST_AUTO_TEST_CASE( BinaryTest ) {
 	vector<SparseData> testVector;
 	
 	const int length = 20;
-	const int count = 20;
+	const int count = 100;
 	int counter = 0;
 	for (int i = 0; i < count; i++) {
 		SparseData item;
@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( BinaryTest ) {
 		inner_range.push_back(i);
 	}
 	
-	double threshold = 0.75;
+	double threshold = 0.8;
 	auto groupsNaive = Algorithm::naiveBinary(testVector, outer_range, inner_range, threshold);
 	auto groupsTriangle = Algorithm::triangleBinary(testVector, outer_range, inner_range, threshold, length);
 	
@@ -71,7 +71,7 @@ BOOST_AUTO_TEST_CASE( RealTest ) {
 		inner_range.push_back(i);
 	}
 	
-	double threshold = 0.75;
+	double threshold = 0.8;
 	auto groupsNaive = Algorithm::naiveReal(testVector, outer_range, inner_range, threshold);
 	auto groupsTriangle = Algorithm::triangleReal(testVector, outer_range, inner_range, threshold);
 	
