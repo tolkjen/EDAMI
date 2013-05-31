@@ -41,10 +41,10 @@ int main() {
 	double similarity = 0.5;
 	
 	Timer::instance().startMeasure();
-	auto groups = Algorithm::naiveBinary( testDataVector, outer_range, inner_range, similarity );
+	//auto groups = Algorithm::naiveBinary( testDataVector, outer_range, inner_range, similarity );
 	//auto groups = Algorithm::naiveReal( testDataVector, outer_range, inner_range, similarity );
 	//auto groups = Algorithm::triangleBinary( testDataVector, outer_range, inner_range, similarity, length );
-	//auto groups = Algorithm::triangleReal( testDataVector, outer_range, inner_range, similarity, length );
+	auto groups = Algorithm::triangleReal( testDataVector, outer_range, inner_range, similarity );
 	Timer::instance().finishMeasure("Calculation time");
 	
 	// Print results

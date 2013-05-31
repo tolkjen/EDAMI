@@ -1,18 +1,18 @@
 #include <algorithm>
 #include <cmath>
-#include <set>
-#include <iostream>
+#include <vector>
 
 #include "Algorithm.h"
 
 using namespace std;
 
-struct classcomp {
-	bool operator() (const pair<int, double>& lhs, const pair<int, double>& rhs) const {
-		return lhs.second < rhs.second;
+struct {
+	bool operator() (pair<int, double> a, pair<int, double> b) { 
+		return (a.second < b.second);
 	}
-};
+} comp_object;
 
+int binary_lookup(double element, vector<pair<int, double>> &tab);
 double binarySimilarity(SparseData &a, SparseData &b);
 double vectorDifference(SparseData &a, SparseData &b);
 double vectorLength(SparseData &s);
@@ -62,22 +62,25 @@ vector<Algorithm::IDVector> Algorithm::naiveReal(vector<SparseData> &data, vecto
 vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim, int attr) {
 	vector<IDVector> result;
 	
-	multiset<pair<int, double>, classcomp> idSet;
+	vector<pair<int, double>> idVector;
 	for (int outerID : outer) {
-		idSet.insert( make_pair(outerID, (double) data[outerID].data.size() / attr) );
+		double outerDist = (double) data[outerID].data.size() / attr;
+		idVector.push_back( make_pair(outerID, vectorLength(data[outerID])) );
 	}
+	
+	sort(idVector.begin(), idVector.end(), comp_object);
 	
 	for (int innerID : inner) {
 		IDVector idv;
 		idv.push_back( innerID );
 		
-		auto pLookup = make_pair(innerID, (double) data[innerID].data.size() / attr);
-		auto it = idSet.find( pLookup );
+		double innerDist = (double) data[innerID].data.size() / attr;
+		auto it = idVector.begin() + binary_lookup(innerDist, idVector);
 
-		if (it != idSet.end()) {
+		if (it != idVector.end()) {
 			auto itNext = it;
 			++itNext;
-			while (itNext != idSet.end() && (double) itNext->second - it->second <= sim) {
+			while (itNext != idVector.end() && (double) itNext->second - it->second <= sim) {
 				if (binarySimilarity(data[innerID], data[itNext->first]) >= sim && innerID != itNext->first) {
 					idv.push_back( itNext->first );
 				}
@@ -91,7 +94,7 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 				if (binarySimilarity(data[innerID], data[itPrev->first]) >= sim && innerID != itPrev->first) {
 					idv.push_back( itPrev->first );
 				}
-				if (itPrev != idSet.begin()) {
+				if (itPrev != idVector.begin()) {
 					--itPrev;
 				} else {
 					break;
@@ -107,14 +110,12 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim) {
 	vector<IDVector> result;
 	
-	multiset<pair<int, double>, classcomp> idSet;
+	vector<pair<int, double>> idVector;
 	for (int outerID : outer) {
-		idSet.insert( make_pair(outerID, vectorLength(data[outerID])) );
+		idVector.push_back( make_pair(outerID, vectorLength(data[outerID])) );
 	}
 	
-	/*for (auto it = idSet.begin(); it != idSet.end(); it++) {
-		cout << "(" << it->first << ", " << it->second << ")" << endl;
-	}*/
+	sort(idVector.begin(), idVector.end(), comp_object);
 	
 	double vecCoefficient = (double) (sim + 1.0) / (2.0 * sim);
 	double simCoefficient = (double) sqrt(-4.0*sim*sim + (sim+1.0)*(sim+1.0)) / (2.0 * sim);
@@ -124,25 +125,20 @@ vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, ve
 		idv.push_back( innerID );
 		
 		SparseData modData = data[innerID];
-		double modSimilarity = vectorLength(data[innerID]) * simCoefficient;
+		double vLength = vectorLength(data[innerID]);
+		double modSimilarity = vLength * simCoefficient;
+		double modDataLength = vLength * vecCoefficient;
 		
 		for (auto &p : modData.data) {
 			p.second *= vecCoefficient;
 		}
-		double modDataLength = vectorLength(modData);
+
+		auto it = idVector.begin() + binary_lookup(modDataLength, idVector);
 		
-		auto it = idSet.begin();
-		while (it != idSet.end() && it->second > modDataLength) {
-			++it;
-		}
-		
-		//auto pLookup = make_pair(innerID, vectorLength(data[innerID]));
-		//auto it = idSet.find(pLookup);
-		
-		if (it != idSet.end()) {
+		if (it != idVector.end()) {
 			auto itNext = it;
 			++itNext;
-			while (itNext != idSet.end() && (double) itNext->second - modDataLength <= modSimilarity) {
+			while (itNext != idVector.end() && (double) itNext->second - modDataLength <= modSimilarity) {
 				if (vectorDifference(modData, data[itNext->first]) <= modSimilarity && innerID != itNext->first) {
 					idv.push_back( itNext->first );
 				}
@@ -155,7 +151,7 @@ vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, ve
 			if (vectorDifference(modData, data[itPrev->first]) <= modSimilarity && innerID != itPrev->first) {
 				idv.push_back( itPrev->first );
 			}
-			if (itPrev != idSet.begin()) {
+			if (itPrev != idVector.begin()) {
 				--itPrev;
 			} else {
 				break;
@@ -166,6 +162,21 @@ vector<Algorithm::IDVector> Algorithm::triangleReal(vector<SparseData> &data, ve
 	}
 	
 	return result;
+}
+
+int binary_lookup(double element, vector<pair<int, double>> &tab) {
+	int first = 0, last = tab.size() - 1, middle;
+	while (last - first > 1) {
+		middle = (last + first) / 2;
+		if (tab[middle].second > element) {
+			last = middle;
+		} else if (tab[middle].second < element) {
+			first = middle;
+		} else {
+			return middle;
+		}
+	}
+	return middle;
 }
 
 double binarySimilarity(SparseData &a, SparseData &b) {
