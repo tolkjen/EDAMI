@@ -5,8 +5,11 @@
 #include <boost/program_options.hpp>
 #include "Algorithm.h"
 #include "Timer.h"
+#include "IReader.h"
+#include "InternetDataReader.h"
 
 using namespace std;
+namespace opt = boost::program_options;
 
 /*
  * Holds CLI arguments provided by user.
@@ -25,19 +28,28 @@ struct CLIArguments {
  *
  * @param vm Boost variable map that holds information about provided arguments.
  * @param args Values for CLI arguments provided by user.
- * @param algorithm Algorithm type that should be used in execution.
+ * @param algorithmType Algorithm type that should be used in execution.
+ * @param readMode Mode of interpreting input data.
  * @return Error code
  */
-int parseCLIArguments(boost::program_options::variables_map &vm, CLIArguments &args, Algorithm::AlgorithmType &algorithm);
+int parseCLIArguments(opt::variables_map &vm, CLIArguments &args, Algorithm::AlgorithmType &algorithmType, IReader::ReadMode &readMode);
 
 /*
- * @brief Checks algorithm type basing on user preferences.
+ * @brief Returns algorithm type basing on user preferences.
  *
  * @param algorithm Algorithm name that should be used in execution.
  * @param interpretation Method of data interpretation.
  * @return Algorithm type.
  */
 Algorithm::AlgorithmType getAlgorithmType(string algorithm, string interpretation);
+
+/*
+ * @brief Returns input data read mode basing on user preferences.
+ *
+ * @param interpretation Method of data interpretation.
+ * @return Read mode.
+ */
+IReader::ReadMode getReadMode(string interpretation);
 
 /*
  * OBSOLETE: to be removed
@@ -47,26 +59,27 @@ SparseData makeSparseData(int id, double *tab, int length);
 int main(int argc, char *argv[]) {
 	CLIArguments args;
 	Algorithm::AlgorithmType algorithm;
+	IReader::ReadMode readMode;
 
 	// Collect CLI arguments
-	boost::program_options::options_description options("Options");
+	opt::options_description options("Options");
 	options.add_options()
 		("help,h", "print help message")
-		("input-data,d", boost::program_options::value<string>(&args.inputFile), "file with input data (-d flag can be omitted)")
-		("target-set,r", boost::program_options::value<string>(&args.targetSet)->default_value("1"), "number of rows defining set for which similar vectors will be searched")
-		("search-set,s", boost::program_options::value<string>(&args.searchSet)->default_value("all"), "number of rows defining set where similar vectors will be searched")
-		("algorithm,a", boost::program_options::value<string>(&args.algorithm)->default_value("triangle"), "search algorithm")
-		("interpretation,i", boost::program_options::value<string>(&args.interpretation)->default_value("real"), "data interpretation method")
-		("treshold,t", boost::program_options::value<double>(&args.treshold), "Tanimoto similarity threshold value")
+		("input-data,d", opt::value<string>(&args.inputFile), "file with input data (-d flag can be omitted)")
+		("target-set,r", opt::value<string>(&args.targetSet)->default_value("1"), "number of rows defining set for which similar vectors will be searched")
+		("search-set,s", opt::value<string>(&args.searchSet)->default_value("all"), "number of rows defining set where similar vectors will be searched")
+		("algorithm,a", opt::value<string>(&args.algorithm)->default_value("triangle"), "search algorithm")
+		("interpretation,i", opt::value<string>(&args.interpretation)->default_value("real"), "data interpretation method")
+		("treshold,t", opt::value<double>(&args.treshold), "Tanimoto similarity threshold value")
 	;
 
-	boost::program_options::positional_options_description defaultOption;
+	opt::positional_options_description defaultOption;
 	defaultOption.add("input-data", 1);
 
-	boost::program_options::variables_map vm;
+	opt::variables_map vm;
 	try {
-		boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(options).positional(defaultOption).run(), vm);
-		boost::program_options::notify(vm);
+		opt::store(opt::command_line_parser(argc, argv).options(options).positional(defaultOption).run(), vm);
+		opt::notify(vm);
 	}
 	catch(...) {
 		cout << "Invalid program options!" << endl;
@@ -81,13 +94,14 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Parse CLI arguments
-	int ret = parseCLIArguments(vm, args, algorithm);
+	int ret = parseCLIArguments(vm, args, algorithm, readMode);
 	if(ret != 0) {
 		return ret;
 	}
 
 	// Prepare input data
-	// TODO: implement
+	IReader *dataReader = new InternetDataReader();
+	vector<SparseData> dataVector = dataReader->read(args.inputFile, readMode);
 
 	// Some test data
 	const int length = 10;
@@ -112,6 +126,7 @@ int main(int argc, char *argv[]) {
 	// Algorithm
 	Timer::instance().startMeasure();
 	auto groups = Algorithm::perform(algorithm, testDataVector, outer_range, inner_range, args.treshold, length);
+	//auto groups = Algorithm::perform(algorithm, dataVector, outer_range, inner_range, args.treshold, dataReader->attributeCount());
 	Timer::instance().finishMeasure("Calculation time");
 	
 	// Print results
@@ -131,23 +146,28 @@ int main(int argc, char *argv[]) {
 	return 0;
 }
 
-int parseCLIArguments(boost::program_options::variables_map &vm, CLIArguments &args, Algorithm::AlgorithmType &algorithm) {
+int parseCLIArguments(opt::variables_map &vm, CLIArguments &args, Algorithm::AlgorithmType &algorithmType, IReader::ReadMode &readMode) {
 	// Check if input file is provided
 	if(!vm.count("input-data")) {
-		cout << "No input file provided!" << endl;
+		cout << "[ERROR] No input file provided!" << endl;
 		return 2;
 	}
 
 	// Check if treshold is provided
 	if(!vm.count("treshold")) {
-		cout << "[INFO] No treshold provided, setting to 0.9" << endl;
 		args.treshold = 0.9;
 	}
 
 	// Check desired algorithm type
-	algorithm = getAlgorithmType(args.algorithm, args.interpretation);
-	if(algorithm == Algorithm::AlgorithmType::INVALID_TYPE) {
+	algorithmType = getAlgorithmType(args.algorithm, args.interpretation);
+	if(algorithmType == Algorithm::INVALID_TYPE) {
 		return 3;
+	}
+
+	// Check desired read mode
+	readMode = getReadMode(args.interpretation);
+	if(readMode == IReader::INVALID_MODE) {
+		return 4;
 	}
 
 	return 0;
@@ -156,22 +176,33 @@ int parseCLIArguments(boost::program_options::variables_map &vm, CLIArguments &a
 Algorithm::AlgorithmType getAlgorithmType(string algorithm, string interpretation) {
 	if(algorithm == "naive") {
 		if(interpretation == "binary")
-			return Algorithm::AlgorithmType::NAIVE_BINARY;
+			return Algorithm::NAIVE_BINARY;
 		else if(interpretation == "real")
-			return Algorithm::AlgorithmType::NAIVE_REAL;
+			return Algorithm::NAIVE_REAL;
 		else
-			return Algorithm::AlgorithmType::INVALID_TYPE;
+			return Algorithm::INVALID_TYPE;
 	}
 	else if(algorithm == "triangle") {
 		if(interpretation == "binary")
-			return Algorithm::AlgorithmType::TRIANGLE_BINARY;
+			return Algorithm::TRIANGLE_BINARY;
 		else if(interpretation == "real")
-			return Algorithm::AlgorithmType::TRIANGLE_REAL;
+			return Algorithm::TRIANGLE_REAL;
 		else
-			return Algorithm::AlgorithmType::INVALID_TYPE;
+			return Algorithm::INVALID_TYPE;
 	}
 	else
-		return Algorithm::AlgorithmType::INVALID_TYPE;
+		return Algorithm::INVALID_TYPE;
+}
+
+IReader::ReadMode getReadMode(string interpretation) {
+	if(interpretation == "real") {
+		return IReader::REAL;
+	}
+	else if(interpretation == "binary") {
+		return IReader::BINARY;
+	}
+	else
+		return IReader::INVALID_MODE;
 }
 
 SparseData makeSparseData(int id, double *tab, int length) {
