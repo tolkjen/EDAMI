@@ -17,6 +17,19 @@ double binarySimilarity(SparseData &a, SparseData &b);
 double vectorDifference(SparseData &a, SparseData &b);
 double vectorLength(SparseData &s);
 
+vector<Algorithm::IDVector> Algorithm::perform(Algorithm::AlgorithmType type, std::vector<SparseData> &data, std::vector<int> &outer, std::vector<int> &inner, double sim, int attr) {
+	switch(type) {
+	case NAIVE_BINARY:
+		return naiveBinary(data, outer, inner, sim);
+	case NAIVE_REAL:
+		return naiveReal(data, outer, inner, sim);
+	case TRIANGLE_BINARY:
+		return triangleBinary(data, outer, inner, sim, attr);
+	case TRIANGLE_REAL:
+		return triangleReal(data, outer, inner, sim);
+	}
+}
+
 vector<Algorithm::IDVector> Algorithm::naiveBinary(vector<SparseData> &data, vector<int> &outer, vector<int> &inner, double sim) {
 	vector<IDVector> result;
 	
@@ -242,4 +255,3 @@ double vectorLength(SparseData &s) {
 	}
 	return (double) sqrt(sum);
 }
-
