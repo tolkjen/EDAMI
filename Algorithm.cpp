@@ -78,7 +78,7 @@ vector<Algorithm::IDVector> Algorithm::triangleBinary(vector<SparseData> &data, 
 	vector<pair<int, double>> idVector;
 	for (int outerID : outer) {
 		double outerDist = (double) data[outerID].data.size() / attr;
-		idVector.push_back( make_pair(outerID, vectorLength(data[outerID])) );
+		idVector.push_back( make_pair(outerID, outerDist) );
 	}
 	
 	sort(idVector.begin(), idVector.end(), comp_object);
