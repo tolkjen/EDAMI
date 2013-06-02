@@ -3,10 +3,12 @@
 #include <map>
 #include <string>
 #include <boost/program_options.hpp>
+
 #include "Algorithm.h"
 #include "Timer.h"
 #include "IReader.h"
 #include "InternetDataReader.h"
+#include "RangeParser.h"
 
 using namespace std;
 namespace opt = boost::program_options;
@@ -58,7 +60,6 @@ SparseData makeSparseData(int id, double *tab, int length);
 
 int main(int argc, char *argv[]) {
 	CLIArguments args;
-	Algorithm::AlgorithmType algorithm;
 	IReader::ReadMode readMode;
 
 	// Collect CLI arguments
@@ -94,6 +95,10 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Parse CLI arguments
+	vector<int> targetRows = RangeParser::parseRowRanges(args.targetSet);
+	vector<int> searchRows = RangeParser::parseRowRanges(args.searchSet);
+
+	Algorithm::AlgorithmType algorithm;
 	int ret = parseCLIArguments(vm, args, algorithm, readMode);
 	if(ret != 0) {
 		return ret;
