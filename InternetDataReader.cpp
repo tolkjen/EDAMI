@@ -1,4 +1,5 @@
 #include <fstream>
+#include <sstream>
 
 #include "InternetDataReader.h"
 
@@ -8,32 +9,23 @@ InternetDataReader::InternetDataReader() : m_attributeCount(0)
 {
 }
 
-vector<SparseData> InternetDataReader::read(string filename, ReadMode mode) {
+vector<SparseData> InternetDataReader::read(string filename) {
 	vector<SparseData> inputData;
 	ifstream file(filename);
 
+	int id = 0;
 	string dataRow;
 	SparseData sparseRow;
-	while(file.eof() == false) {
+	while(true) {
 		getline(file, dataRow);
-
-		switch(mode) {
-		case REAL:
-			sparseRow = readRealRow(dataRow);
+		if(file.eof())
 			break;
-		case BINARY:
-			sparseRow = readBinaryRow(dataRow);
-			break;
-		}
-
+		sparseRow = readRow(dataRow);
+		sparseRow.id = id;
 		inputData.push_back(sparseRow);
+		++id;
 	}
 
-	/*
-	 * We can read size of only last row, beacause all rows have the same length.
-	 * If sparseRow is empty then size will be 0 anyway.
-	 */
-	m_attributeCount = sparseRow.data.size();
 	file.close();
 	return inputData;
 }
@@ -42,10 +34,22 @@ int InternetDataReader::attributeCount() const {
 	return m_attributeCount;
 }
 
-SparseData InternetDataReader::readRealRow(string row) {
-	// TODO: implement
-}
+SparseData InternetDataReader::readRow(string row) {
+	SparseData sparseData;
+	stringstream tokenizer(row);
 
-SparseData InternetDataReader::readBinaryRow(string row) {
-	// TODO: implement
+	int index = 0;
+	double value;
+	while(tokenizer >> value) {
+		if(value == 0.0) {
+			++index;
+			continue;
+		}
+
+		sparseData.data.push_back(make_pair(index, value));
+		++index;
+	}
+
+	m_attributeCount = index;
+	return sparseData;
 }

@@ -14,7 +14,7 @@ public:
 	/*
 	 * @see std::vector<SparseData> IReader::read(std::string filename)
 	 */
-	virtual std::vector<SparseData> read(std::string filename, ReadMode mode);
+	virtual std::vector<SparseData> read(std::string filename);
 
 	/*
 	 * @see int IReader::attributeCount() const
@@ -23,20 +23,12 @@ public:
 
 private:
 	/*
-	 * @brief Reads one row of input data in normal form.
+	 * @brief Reads one row of input data.
 	 *
 	 * @param row Data row.
 	 * @return Sparse data.
 	 */
-	SparseData readRealRow(std::string row);
-
-	/*
-	 * @brief Reads one row of input data in binary form.
-	 *
-	 * @param row Data row.
-	 * @return Sparse data.
-	 */
-	SparseData readBinaryRow(std::string row);
+	SparseData readRow(std::string row);
 
 	/*
 	 * Number of attributes in one row o input data.

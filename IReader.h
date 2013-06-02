@@ -8,15 +8,6 @@
  */
 class IReader {
 public:
-	/*
-	 * Defines type of input data interpretation
-	 */
-	enum ReadMode {
-		REAL = 0,
-		BINARY,
-		INVALID_MODE
-	};
-
 	virtual ~IReader() {}
 
 	/*
@@ -25,7 +16,7 @@ public:
 	 * @param filename Name of the file to be read.
 	 * @return A sequence of read data.
 	 */
-	virtual std::vector<SparseData> read(std::string filename, ReadMode mode) = 0;
+	virtual std::vector<SparseData> read(std::string filename) = 0;
 	
 	/*
 	 * @brief Returns the number of attributes in the data set.
