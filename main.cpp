@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 		searchForRows = RangeParser::parseRowRanges(args.searchForSet);
 	}
 	else {
-		searchForRows = RangeParser::rangeToRows(to_string(dataVector.size() - 1));
+		searchForRows = RangeParser::rangeToRows("0-" + to_string(dataVector.size() - 1));
 	}
 
 	if(args.searchWithinSet != "all") {
