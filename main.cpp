@@ -119,7 +119,7 @@ int main(int argc, char *argv[]) {
 	
 	// Print results
 	for (unsigned int i = 0; i < groups.size(); i++) {
-		cout << "Similar to " << searchForRows[i] << ":" << endl;
+		cout << "Similar to " << searchForRows[i] << " (" << groups[i].size() << " found):" << endl;
 		for (int id : groups[i]) {
 			cout << id << endl;
 		}
