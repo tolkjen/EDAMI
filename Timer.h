@@ -18,25 +18,30 @@ using namespace std::chrono;
 class Timer {
 public:
 	/*
-	 * Holds pairs of description and time of activities.
+	 * @brief Holds pairs of description and time of activities.
 	 */
 	vector<pair<string, double>> measures;
 	
 public:	
 	/*
-	 * Starts time measurement. 
+	 * @brief Starts time measurement. 
 	 */
 	void startMeasure();
 	
 	/*
-	 * Finishes time measurement and assigns a description to it.
+	 * @brief Finishes time measurement and assigns a description to it.
 	 * 
 	 * @param str Description of time measurement.
 	 */
 	void finishMeasure(string str);
 	
 	/*
-	 * Gives an instance of singleton. Use it to access methods.
+	 * @brief Finishes measurement and returns a time value.
+	 */
+	double finishMeasure();
+	
+	/*
+	 * @brief Gives an instance of singleton. Use it to access methods.
 	 */
 	static Timer& instance();
 	

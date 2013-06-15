@@ -1,4 +1,4 @@
 libraries = ['boost_unit_test_framework']
 flags = ['-std=c++11']
-src = ['test.cpp', '../Algorithm.cpp']
+src = ['test.cpp', '../Algorithm.cpp', '../Reporter.cpp']
 Program(target='unittest', source=src, LIBS=libraries, CCFLAGS=flags)

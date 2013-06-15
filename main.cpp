@@ -9,6 +9,7 @@
 #include "IReader.h"
 #include "InternetDataReader.h"
 #include "RangeParser.h"
+#include "Reporter.h"
 
 using namespace std;
 namespace opt = boost::program_options;
@@ -113,9 +114,11 @@ int main(int argc, char *argv[]) {
 	cout << endl;
 
 	// Algorithm
-	Timer::instance().startMeasure();
 	auto groups = Algorithm::perform(algorithm, dataVector, searchWithinRows, searchForRows, args.treshold, dataReader->attributeCount());
-	Timer::instance().finishMeasure("Calculation time");
+	
+	// Print reported messages
+	for (auto &entry : Reporter::instance().reports)
+		cout << entry << endl;
 	
 	// Print results
 	for (unsigned int i = 0; i < groups.size(); i++) {
@@ -124,11 +127,6 @@ int main(int argc, char *argv[]) {
 			cout << id << endl;
 		}
 		cout << endl;
-	}
-	
-	// Print timings
-	for (auto &entry : Timer::instance().measures) {
-		cout << entry.first << ": " << fixed << entry.second << " s" << endl;
 	}
 		
 	return 0;
