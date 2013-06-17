@@ -8,6 +8,7 @@
 #include "Timer.h"
 #include "IReader.h"
 #include "InternetDataReader.h"
+#include "SportDataReader.h"
 #include "RangeParser.h"
 #include "Reporter.h"
 
@@ -87,7 +88,8 @@ int main(int argc, char *argv[]) {
 	}
 
 	// Read input data
-	IReader *dataReader = new InternetDataReader();
+	//IReader *dataReader = new InternetDataReader();
+	IReader *dataReader = new SportDataReader();
 	vector<SparseData> dataVector = dataReader->read(args.inputFile);
 
 	// Check ranges
